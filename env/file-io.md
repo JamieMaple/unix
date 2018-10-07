@@ -129,5 +129,62 @@ ssize_t pread(int fd, void *buf, size_t nbytes, off_t offset);
 ssize_t pwrite(int fd, const void *buf, size_t nbytes, off_t offset);
 ```
 
+### `dup` 和 `dup2`
 
+用以复制现有的文件描述符
+
+``` c
+#include <unistd.h>
+
+int dup(int fd);
+int dup2(int fd, int fd2);
+```
+
+### `sync` 和 `fsync` 以及 `fdatasync`
+
+``` c
+#include <unistd.h>
+
+int fsync(int fd); // 等待写磁盘操作结束才返回
+
+int fdatasync(int fd); // 
+
+void sync(void);
+
+// sync 将所有的块缓冲区排入写队列，不等接待实际写磁盘操作结束
+// update 系统守护进程定期调用 sync，定期 flush 内核的块缓冲区
+```
+
+### `fcntl`
+
+可以用来改变已经打开文件的属性
+
+``` c
+#include <fcntl.h>
+
+int fcntl(int fd, int cmd, ... /* int arg */);
+```
+
+### `ioctl`
+
+io 操作杂物箱
+
+``` c
+#include <unistd.h>
+#include <sys/ioctl.h>
+
+int ioctl(int fd, int request, ...);
+```
+
+### /dev/fd
+
+打开文件描述符 `/dev/fd/{n}` 等效于复制
+
+一般常用于 shell 使用场景
+
+### 总结
+
+`read` 和 `write` 都是在内核中进行的，所以这些函数不带缓冲的 IO 操作
+
+原子操作
 
