@@ -31,7 +31,7 @@ int fstatat(int fd, const char *restrict pathname, struct stat *restrict buf, in
 
 (6) 套接字(用于进程间的网络通信)
 
-(7) 符号链接
+(7) 符号链接(软链接)
 
 ### access faccessat
 
@@ -184,6 +184,91 @@ int renameat(int oldfd, const char *oldname, int newfd, const char *newname);
 1. 硬链接直接指向了文件的 i节点
 
 1. 硬链接通常要求链接
+
+### 创建和读取符号链接（软链接）
+
+创建软链接
+
+``` c
+#include <unistd.h>
+
+int symlink(const char *actualpath, const char *sympath);
+
+int symlinkat(const char *actualpath, int fd, const char *sympath);
+```
+
+读取软链接本身
+
+``` c
+#include <unistd.h>
+
+ssize_t readlink(const char *restrict pathname, char *restrict buf, size_t bufsize);
+
+ssize_t readlinkat(int fd, const char *restrict pathname, char *restrict buf, size_t bufsize);
+
+```
+
+结合了 `open` `read` 和 `close` 所有操作
+
+### 文件时间
+
+
+| 字段    | 说明                     | 例子         | ls options |
+|---------|--------------------------|--------------|------------|
+| st_atim | 文件数据的最后访问时间   | read         | -u         |
+| st_mtim | 文件数据的最后修改时间   | write        | 默认       |
+| st_ctim | i 节点状态的最后更新时间 | chmod、chown | -c         |
+
+以纳秒为单位
+
+### `futimens` `utimensat` `utimes`
+
+一个文件的访问和修改时间通过以下几个函数更改。
+
+``` c
+#include <sys/stat.h>
+
+int futimens(int fd, const struct timespec times[2]);
+
+int utimensat(int fd, const char *path, const struct timespec times[2], int flag);
+```
+
+`times` 数组，第一个包含访问时间，第二个包含修改时间
+
+``` c
+#include <sys/time.h>
+
+int utimes(const char *pathname, const struct timeval times[2]);
+
+struct timeval {
+    time_t tv_sec; /* seconds */
+    long tv_usec; /* microseconds */
+}
+```
+
+### `mkdir` `mkdirat` `rmdir`
+
+创建目录
+
+``` c
+#include <sys/stat.h>
+
+int mkdir(const char *pahtname, mode_t mode);
+
+int mkdirat(int fd, const char *pathname, mode_t mode);
+```
+
+`.` 和 `..` 目录项自动创建，通常对于文件至少要设置执行权限位
+
+常见的错误是指定与文件相同的 mode (读和写)
+
+``` c
+#include <unistd.h>
+
+int rmdir(const char *pathname);
+```
+
+只可以用来删除空目录（只包含 `.` 和 `..`）
 
 
 
