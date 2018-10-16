@@ -270,6 +270,60 @@ int rmdir(const char *pathname);
 
 只可以用来删除空目录（只包含 `.` 和 `..`）
 
+### 读目录
+
+``` c
+#include <dirent.h>
+
+DIR *opendir(const char *pathname);
+
+DIR *fopendir(int fd);
+
+struct dirent *readdir(DIR *dp);
+
+void rewinddir(DIR *dp);
+
+int closedir(DIR *dp);
+long telldir(DIR *dp);
+
+void seekdir(DIR *dp, long loc);
+```
+
+### `chdir` `fchdir` `getcwd`
+
+用以更改当前工作目录
+``` c
+#include <unistd.h>
+
+int chdir(const char *pathanme);
+int fchdir(int fd);
+```
+
+注意：只会影响到进程，不会影响到 `shell`
+
+内核维护当前工作目录的信息，但是内核只为每个进程保存指向该目录 v节点的指针等信息，并不是完整的目录路径
+
+向上递归查找到根目录，获取绝对路径
+
+``` c
+#include <unistd.h>
+
+char *getcwd(char *buf, size_t size);
+```
+
+`size` 必须足够长能够容纳路径名以及一个 `null` 字节，否则出错
+
+### 设备特殊文件
+
+1. 每个文件系统所在的存储设备都由主、次设备号表示，数据类型通常是 `dev_t`
+
+1. 两个宏：`major` 和 `minor`
+
+1. 系统中与每个文件名关联的 `st_dev` 是文件系统的设备号
+
+1. 只有字符特殊文件和块特殊文件才有 `st_rdev` 值。这个值包含实际设备的设备号
+
+
 
 
 
