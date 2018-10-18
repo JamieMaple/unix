@@ -207,19 +207,162 @@ int puts(const char *str);
 
 ### 标准 I/O 的效率
 
-
+对于大多数应用而言，最主要的用户 CPU 时间是由应用本身的各种处理消耗的，而不是标准 I/O 例程消耗的。
 
 ### 二进制 I/O
 
+``` c
+#include <stdio.h>
 
+size_t fread(void *restrict ptr, size_t size, size_t nobj, FILE *restrict fp);
+
+size_t fwrite(const void *restrict ptr, size_t size, size_t nobj, FILE *restrict fp);
+```
+
+对于读而言，当出错或到达文件尾端，所以可能返回当少于 `nobj`
+所以该情况最好调用 `ferror` 或 `feof` 以判断究竟是哪种情况。
+
+对于写而言，当返回当少于所要求当 `nobj` 时出错
+
+对于异构系统，很比较大的问题(通常是在网络通信中回遇到)
 
 ### 定位流
 
+获取流或更改流的位置：
 
+``` c
+#include <stdio.h>
+
+long ftell(FILE *fp);
+
+int fseek(FILE *fp, long offset, int whence);
+
+void rewind(FILE *fp);
+```
+
+有所不同的：
+
+``` c
+#include <stdio.h>
+
+off_t ftello(FILE *fp);
+
+int fseeko(FILE *fp, off_t offset, int whence);
+```
+
+ISO C 引入：
+
+``` c
+#include <stdio.h>
+
+int fgetpos(FILE *restrict fp, fpos_t *restrict pos);
+
+int fsetpos(FILE *fp, const fpos_t *pos);
+```
 
 ### 格式化 I/O
 
+格式化标准输出：
 
+``` c
+#include <stdio.h>
+
+int printf(const char *restrict format, ...);
+
+int fprintf(FILE *restrict fp, const char *restrict format, ...);
+
+int dprintf(int fd, const char *restrict format, ...);
+
+int sprintf(char *restrict buf, const char *restrict format, ...);
+
+int snprintf(char *restrict buf, size_t n, const char *restrict format, ...);
+```
+
+有变种：
+
+``` c
+#include <stdio.h>
+#include <stdarg.h>
+
+int vprintf(const char *restrict format, va_list arg);
+
+int vfprintf(FILE *restrict fp, const char *restrict format, va_list arg);
+
+int vdprintf(int fd, const char *restrict format, va_list arg);
+
+int vsprintf(char *restrict buf, const char *restrict format, va_list arg);
+
+int vsnprintf(char *restrict buf, size_t n, const char *restrict format, va_list arg);
+```
+
+格式化输出：
+
+``` c
+#include <stdio.h>
+
+int scanf(const char *restrict format, ...);
+
+int fscanf(FILE *restrict fp, const char *restrict format, ...);
+
+int sscanf(const char *restrict buf, const char *restrict format, ...);
+```
 
 ### 实现细节
+
+**为了了解所使用的系统标准 I/O 库的实现，最好从头文件<stdio.h>开始**。然后可以详细看源码的实现
+
+### 临时文件
+
+创建临时文件：
+``` c
+#include <stdio.h>
+
+char *tmpnam(char *ptr);
+
+FILE *tmpfile(void);
+```
+
+另外的创建临时文件和目录：
+
+``` c
+#include <stdio.h>
+
+char *mkdtemp(char *template);
+
+int mkstemp(char *template);
+```
+
+`template` 字符串后6位为 `XXXXXX`
+
+`mkstemp` 创建的临时文件不会自动删除
+
+另外，`tmpnam` 和 `mkdtemp` 返回唯一路径和使用该路径之间存在一个时间窗口
+
+### 内存流
+
+创建内存流：
+
+``` c
+#include <stdio.h>
+
+FILE *fmemopen(void *restrict buf, size_t size, const char *restrict type);
+
+FILE *open_memstream(char **bufp, size_t *sizep);
+
+#include <wchar.h>
+
+FILE *open_wmemstream(wchar_t **bufp, size_t *sizep);
+
+```
+
+后两者与第一个有很大区别
+
+### 替代标准 I/O
+
+标准 IO 库不足之处在于它效率不高，和它需要复制的数据量有很大关系
+
+(当使用每次一行函数 `fgets` 和 `fputs`)
+1. 内核与标准 IO 缓冲之间需要复制一次数据
+
+1. 标准 IO 缓冲区和用户程序当行缓冲区之间又要复制
 
