@@ -230,18 +230,80 @@ int fexecve(int fd, char *const argv[], char *const envp[]);
 
 ### 更改用户 ID 和更改组 ID
 
+设计应用时，应该使用最小特权模型
+
+设置和取得实际用户ID和有效用户ID或实际组ID和有效组ID：
+
+``` c
+#include <unistd.h>
+
+int setuid(uid_t uid);
+int setgid(gid_t gid);
+```
+
+交换实际用户ID和有效用户ID：
+
+``` c
+#include <unistd.h>
+
+int setreuid(uid_t ruid, uid_t euid);
+
+int setregid(gid_t rgid, gid_t egid);
+```
+
+更改和取得有效用户ID和有效用户组ID：
+
+``` c
+#include <unistd.h>
+
+int seteuid(uid_t uid);
+
+int setegid(gid_t gid);
+```
+
+apue 上以 `at` 命令为例
 
 
+### 解释器文件(interpreter file)
 
-### 解释器文件
+解释器文件，文件开头是：
+
+``` shell
+#! pathname [optional argument]
+```
+
+一般而言，`pathname` 是一个绝对路径，第一行也有长度限制
+
+基于以下好处：
+
+1. 可以隐藏所使用的某种语言
+
+1. 效率方面有提升
+
+1. 可以用其他 shell 来编写脚本（不单单只用 shell 脚本）
 
 ### 函数 `system`
 
+传入字符串更方便的进行操作，`system` 函数签名：
+
+``` c
+#include <stdlib.h>
+
+int system(const char *cmdstring);
+```
+
+
+
 ### 进程会计
+
+
 
 ### 用户标示
 
+
+
 ### 进程调度
+
 
 
 ### 进程时间
