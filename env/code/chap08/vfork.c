@@ -16,6 +16,7 @@ int main() {
         var++;
         _exit(0);
     }
+    close(STDOUT_FILENO);
 
     printf("pid = %ld, glob = %d, val = %d\n", (long)getpid(), globval, var);
 

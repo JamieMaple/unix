@@ -292,22 +292,68 @@ apue 上以 `at` 命令为例
 int system(const char *cmdstring);
 ```
 
-
+该函数内部使用了 `fork` `exec` 以及 `waitpid` 三个函数
 
 ### 进程会计
 
+启用进程会计后，每当进程结束时，内核就会写一个会议记录
 
+相关命令：`dd`
 
 ### 用户标示
 
+任意进程都可以得到其实际用户ID和有效用户ID和组ID，但是有时候我们希望能够找到运行该程序用户的登陆名
 
+通过以下函数能够获得用户登陆时的登陆名
+
+``` c
+#include <unistd.h>
+
+char *getlogin(void);
+```
 
 ### 进程调度
 
+系统调度策略和调度优先级是由内核所确定的。但是只有特权进程能够提高自身的优先级。
 
+进程的优先级是通过 `nice` 值确定的，值越小优先级越高
+
+进程获取或更改它的 `nice` 值:
+
+``` c
+#include <unistd.h>
+
+int nice(int incr);
+```
+
+获取或设置一组相关进程的 `nice` 值:
+
+``` c
+#include <sys/resource.h>
+
+int getpriority(int which, id_t who);
+
+int setpriority(int which, id_t who, int value);
+```
+
+相关命令：`nice`
 
 ### 进程时间
 
+任一进程调用获取自己以及已终止子进程的时间值。
+
+``` c
+#include <sys/time.h>
+
+clock_t times(struct tms *buf);
+
+struct tms {
+    clock_t tms_utime; // user time
+    clock_t tms_stime; // system time
+    clock_t tms_cutime; // user time, terminated children
+    clock_t tms_cstime; // system time, terminated children
+}
+```
 
 
 
