@@ -14,9 +14,10 @@ int main() {
         // child
         globval++;
         var++;
-        _exit(0);
+
+        // fclose(stdout);
+        exit(0);
     }
-    close(STDOUT_FILENO);
 
     printf("pid = %ld, glob = %d, val = %d\n", (long)getpid(), globval, var);
 

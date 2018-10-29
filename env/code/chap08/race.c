@@ -1,68 +1,68 @@
 #include "../apue.h"
 
-static int pfd1[2],pfd2[2];
-
-void TELL_WAIT(void){
-
-if(pipe(pfd1)<0 || pipe(pfd2)<0)
-
-err_sys("pipe error");
-
-}
-
- 
-
-void TELL_PARENT(pid_t pid){
-
-if(write(pfd2[1],"c",1)!=1)
-
-err_sys("write error");
-
-}
-
- 
-
-void WAIT_PARENT(void){
-
-char c;
-
-if(read(pfd1[0],&c,1)!=1)
-
-err_sys("read error");
-
-if(c!='p')
-
-err_quit("WAIT_PARENT:incorrect data");
-
-}
-
- 
-
-void TELL_CHILD(pid_t pid){
-
-if(write(pfd1[1],"p",1)!=1)
-
-err_sys("write error");
-
-}
-
- 
-
-void WAIT_CHILD(void)
-
-{char c;
-
-if(read(pfd2[0],&c,1)!=1)
-
-err_sys("read_error");
-
-if(c!='c')
-
-err_quit("WAIT_CHILD:incorrect data");
-
-}
-
 static void charatatime(char *);
+
+static volatile sig_atomic_t sigflag; /* set nonzero by sig handler */
+static sigset_t newmask, oldmask, zeromask;
+
+static void
+sig_usr(int signo)	/* one signal handler for SIGUSR1 and SIGUSR2 */
+{
+	sigflag = 1;
+}
+
+void
+TELL_WAIT(void)
+{
+	if (signal(SIGUSR1, sig_usr) == SIG_ERR)
+		err_sys("signal(SIGUSR1) error");
+	if (signal(SIGUSR2, sig_usr) == SIG_ERR)
+		err_sys("signal(SIGUSR2) error");
+	sigemptyset(&zeromask);
+	sigemptyset(&newmask);
+	sigaddset(&newmask, SIGUSR1);
+	sigaddset(&newmask, SIGUSR2);
+
+	/* Block SIGUSR1 and SIGUSR2, and save current signal mask */
+	if (sigprocmask(SIG_BLOCK, &newmask, &oldmask) < 0)
+		err_sys("SIG_BLOCK error");
+}
+
+void
+TELL_PARENT(pid_t pid)
+{
+	kill(pid, SIGUSR2);		/* tell parent we're done */
+}
+
+void
+WAIT_PARENT(void)
+{
+	while (sigflag == 0)
+		sigsuspend(&zeromask);	/* and wait for parent */
+	sigflag = 0;
+
+	/* Reset signal mask to original value */
+	if (sigprocmask(SIG_SETMASK, &oldmask, NULL) < 0)
+		err_sys("SIG_SETMASK error");
+}
+
+void
+TELL_CHILD(pid_t pid)
+{
+	kill(pid, SIGUSR1);			/* tell child we're done */
+}
+
+void
+WAIT_CHILD(void)
+{
+	while (sigflag == 0)
+		sigsuspend(&zeromask);	/* and wait for child */
+	sigflag = 0;
+
+	/* Reset signal mask to original value */
+	if (sigprocmask(SIG_SETMASK, &oldmask, NULL) < 0)
+		err_sys("SIG_SETMASK error");
+}
 
 int main() {
     pid_t pid = fork();
@@ -73,14 +73,14 @@ int main() {
         err_sys("fork error");
     } else if (pid == 0) {
         // child
-        /*WAIT_PARENT();*/
+        WAIT_PARENT();
         charatatime("output from child\n");
         TELL_PARENT(getppid());
     } else {
         // parent
-        WAIT_CHILD();
         charatatime("output from parent\n");
-        /*TELL_CHILD(pid);*/
+        TELL_CHILD(pid);
+        WAIT_CHILD();
     }
 
     exit(0);
