@@ -116,7 +116,7 @@ int pause(void);
 
 ### 信号集
 
-
+信号集处理函数：
 
 ``` c
 #include <signal.h>
@@ -131,24 +131,91 @@ int sigismember(sigset_t *set, int signo);
 
 ### sigprocmask 函数
 
+检测和更改进程信号屏蔽字：
+
+``` c
+#include <signal.h>
+
+int sigprocmask(int how, const sigset_t *restrict set, sigset_t *restrict oset);
+```
+
+PS: 单线程进程专用，看来用处很小了。
+
 ### sigpending 函数
+
+> This function returns the set of signals that are blocked from delivery
+> and currently pending for the calling process
+
+``` c
+#include <signal.h>
+
+int sigpending(sigset_t *set);
+```
 
 ### sigaction 函数
 
+检查与修改和指定信号相关联的处理动作：
+
+``` c
+#include <signal.h>
+
+int sigaction(int signo, const struct sigaction *restrict act, struct sigaction *restrict oact);
+
+struct sigaction {
+    void (*sa_handler)(int);
+    sigset_t sa_mask;
+    int sa_flags;
+    void (*sa_sigaction)(int, siginfo_t *, void);
+}
+```
+
 ### sigsetjmp 和 siglongjmp 函数
+
+信号处理相关的非局部转移：
+
+``` c
+#include <setjmp.h>
+
+int sigsetjmp(sigjmp_buf env, int savemask);
+
+void siglongjmp(sigjmp_buf env, int val);
+```
 
 ### sigsuspend 函数
 
+恢复信号屏蔽子然后使程序进入休眠的一个原子操作：
+
+``` c
+#include <signal.h>
+
+int sigsuspend(const sigset_t *sigmask);
+```
+
 ### abort 函数
+
+``` c
+
+```
+
 
 ### system 函数
 
+
+
 ### sleep、nanosleep 和 clock_nanosleep 函数
+
+
 
 ### sigqueue 函数
 
+
+
 ### 作业控制信号
 
+
+
 ### 信号名和编号
+
+
 
 
