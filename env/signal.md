@@ -193,28 +193,66 @@ int sigsuspend(const sigset_t *sigmask);
 
 ### abort 函数
 
+使得程序异常终止：
+
 ``` c
+#include <stdlib.h>
 
+void abort(void);
 ```
-
 
 ### system 函数
 
-
+第八章曾做过的函数是有缺陷的
 
 ### sleep、nanosleep 和 clock_nanosleep 函数
 
+挂起一段时间：
 
+``` c
+#include <unistd.h>
+
+unsigned int sleep(unsigned int seconds);
+
+#include <time.h>
+
+int nanosleep(const struct timespec *reqtp, struct timespec *remtp);
+
+#include <time.h>
+
+int clock_nanosleep(clockid_t clock_id, int flags, const struct timespec *reqtp, struct timespec *remtp);
+```
 
 ### sigqueue 函数
 
+对信号排队进行了支持：
 
+``` c
+#include <signal.h>
+
+int sigqueue(pid_t pid, int signo, const union sigval value);
+```
 
 ### 作业控制信号
 
+作业控制相关的：
 
+``` c
+SIGCHLD
+SIGCONT
+SIGSTOP
+SIGTSTP
+SIGTTIN
+SIGTTOU
+```
 
 ### 信号名和编号
+
+信号编号和信号名之间的映射:
+
+``` c
+extern char *sys_siglist [];
+```
 
 
 
