@@ -125,6 +125,55 @@ int pthread_rwlock_wdlock(pthread_rwlock_t *rwlock);
 int pthread_rwlock_unlock(pthread_rwlock_t *rwlock);
 ```
 
+带有超时的读写锁：
 
+``` c
+#include <pthread.h>
+#include <time.h>
 
+int pthread_rwlock_timedrdlock(pthread_rwlock_t *restrict rwlock,
+                               const struct timespec *restrict tsptr);
+
+int pthread_rwlock_timedwrlock(pthread_rwlock_t *restrict rwlock,
+                               const struct timespec *restrict tsptr);
+```
+
+### 条件变量
+
+创建和销毁条件变量：
+
+``` c
+#include <pthread.h>
+
+int pthread_cond_init(pthread_cond_t *restrict cond,
+                      const pthread_condattr_t *restrict attr);
+
+int pthread_cond_destory(pthread_cond_t *cond);
+
+// wait
+int pthread_cond_wait(pthread_cond_t *restrict cond, pthread_mutex_t *restrict attr);
+
+int pthread_cond_timedwait(pthread_cond_t *restrict cond,
+                           pthread_mutex_t *restrict attr,
+                           const struct timespec *restrict tsptr);
+
+// awake
+int pthread_cond_signal(pthread_cond_t *cond);
+
+int pthread_cond_broadcast(pthread_cond_t *cond);
+```
+
+### 屏障
+
+初始化和销毁：
+
+``` c
+#include <pthread.h>
+
+int pthread_barrier_init(pthread_barrier_t *restrict barrier,
+                         const pthread_barrierattr_t *restrict attr,
+                         unsigned int count);
+
+int pthread_barrier_destroy(<F10>pthread_barrier_t *barrier);
+```
 
